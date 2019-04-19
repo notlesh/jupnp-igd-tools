@@ -198,7 +198,16 @@ public class NatUpnpManager {
      */
     public void printDeviceRecursive(Device device, String indent) {
         String nextIndent = "|    ";
-        System.out.println(indent +"├-- device: "+ device);
+        System.out.println(indent +"├-- device: "+ device.getDetails().getFriendlyName());
+        System.out.println(indent + nextIndent +"├-- id:           "+ device.getIdentity());
+        System.out.println(indent + nextIndent +"├-- manufacturer: "+ device.getDetails().getManufacturerDetails().getManufacturer());
+        System.out.println(indent + nextIndent +"├-- model:        "
+                + device.getDetails().getModelDetails().getModelName() + " - "
+                + device.getDetails().getModelDetails().getModelNumber() + " - "
+                + device.getDetails().getModelDetails().getModelDescription());
+        System.out.println(indent + nextIndent +"├-- serial:       "+ device.getDetails().getSerialNumber());
+        System.out.println(indent + nextIndent +"├-- uda version:  "+ device.getVersion().getMajor() +"."+ device.getVersion().getMinor());
+        System.out.println(indent + nextIndent +"├-- type:         "+ device.getType());
         for (Service service : device.getServices()) {
             System.out.println(indent + nextIndent + "├-- service:");
             System.out.println(indent + nextIndent + nextIndent + "├-- id:   "+ service.getServiceId());
