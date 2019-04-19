@@ -114,33 +114,59 @@ public class NatUpnpManager {
     }
 
     /**
-     * Sends a UPnP request to the discovered IGD for the external ip address.
+     * Returns a CompletableFuture that will wait for a WANIPConnection service to be discovered.
      *
-     * @throws IllegalStateException if the WANIPConnection has not been discovered yet.
+     * @return future that will return the WANIPConnection service once it is discovered
+     */
+    public CompletableFuture<Service> discoverWANIPConnectionService() {
+
+        return CompletableFuture.supplyAsync(() -> {
+
+            // wait until our thread is interrupted (assume future was cancelled)
+            // or we discover a WANIPConnection service
+            while (!Thread.currentThread().isInterrupted()) {
+                if (isWANIPConnectionServiceDiscovered()) {
+                    return getWANIPConnectionService();
+                } else {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        // fall back through to "isInterrupted() check"
+                    }
+                }
+            }
+            return null;
+        });
+    }
+
+    /**
+     * Sends a UPnP request to the discovered IGD for the external ip address.
      *
      * @return A CompletableFuture that can be used to query the result (or error).
      */
     public CompletableFuture<String> queryExternalIPAddress() {
-        if (null == wanIpConnectionService) {
-            throw new IllegalStateException("Can't query External IP, haven't found WANIPConnection service yet");
-        }
 
-        CompletableFuture<String> future = new CompletableFuture<String>();
+        CompletableFuture<String> upnpQueryFuture = new CompletableFuture<>();
 
-        GetExternalIP callback = new GetExternalIP(wanIpConnectionService) {
-            @Override
-            protected void success(String result) {
-                future.complete(result);
-            }
+        return discoverWANIPConnectionService()
+            .thenCompose(service -> {
 
-            @Override
-            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
-                future.completeExceptionally(new Exception(defaultMsg));
-            }
-        };
-        upnpService.getControlPoint().execute(callback);
+                // our query, which will be handled asynchronously by the jupnp library
+                GetExternalIP callback = new GetExternalIP(service) {
+                    @Override
+                    protected void success(String result) {
+                        upnpQueryFuture.complete(result);
+                    }
 
-        return future;
+                    @Override
+                    public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                        upnpQueryFuture.completeExceptionally(new Exception(msg));
+                    }
+                };
+                upnpService.getControlPoint().execute(callback);
+
+                return upnpQueryFuture;
+            });
     }
 
     /**
