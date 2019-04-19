@@ -36,6 +36,11 @@ public class CLI {
                                 .desc("Print usage help text")
                                 .hasArg(false)
                                 .build());
+        options.addOption(Option.builder("r")
+                                .longOpt("print-registry")
+                                .desc("Print the contents of the registry after 10 seconds of discovery")
+                                .hasArg(false)
+                                .build());
         options.addOption(Option.builder("e")
                                 .longOpt("query-external-ip")
                                 .desc("Query the IGD for the external IP address")

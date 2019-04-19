@@ -32,7 +32,6 @@ public class NatUpnpManager {
     UpnpService upnpService = null;
     RegistryListener registryListener = null;
     Service wanIpConnectionService = null;
-    String externalIPAddress = null;
 
     /**
      * Empty constructor. Creates in instance of UpnpServiceImpl.
@@ -181,6 +180,32 @@ public class NatUpnpManager {
         }
         for (Device subDevice : device.getEmbeddedDevices()) {
             inspectDeviceRecursive(subDevice);
+        }
+    }
+
+    /**
+     * Print the devices and services known to the registry in a hierarchical fashion
+     */
+    public void printRegistryContents() {
+        System.out.println("Devices known to registry:");
+        for (Device device : upnpService.getRegistry().getDevices()) {
+            printDeviceRecursive(device, "");
+        }
+    }
+
+    /**
+     * Recursively print out the devices and services known to the registry
+     */
+    public void printDeviceRecursive(Device device, String indent) {
+        String nextIndent = "|    ";
+        System.out.println(indent +"├-- device: "+ device);
+        for (Service service : device.getServices()) {
+            System.out.println(indent + nextIndent + "├-- service:");
+            System.out.println(indent + nextIndent + nextIndent + "├-- id:   "+ service.getServiceId());
+            System.out.println(indent + nextIndent + nextIndent + "├-- type: "+ service.getServiceType());
+        }
+        for (Device subDevice : device.getEmbeddedDevices()) {
+            printDeviceRecursive(subDevice, (indent + nextIndent));
         }
     }
 }

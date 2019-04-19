@@ -52,6 +52,13 @@ public class App {
                 System.exit(RETURN_UPNP_QUERY_ERROR);
             }
 
+        } else if (cl.hasOption("r")) {
+            NatUpnpManager upnpManager = new NatUpnpManager();
+            upnpManager.start();
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) { }
+            upnpManager.printRegistryContents();
         } else if (cl.hasOption("h")) {
             cli.printUsageText(APP_NAME);
         } else {
