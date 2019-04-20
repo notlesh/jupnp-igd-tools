@@ -22,16 +22,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class NatUpnpManager {
 
     private final Logger log = LoggerFactory.getLogger(NatUpnpManager.class);
 
+    public static final String SERVICE_DEFAULT_NAMESPACE = "schemas-upnp-org";
+    public static final String SERVICE_TYPE_WAN_IP_CONNECTION = "WANIPConnection";
+
     boolean started = false;
     UpnpService upnpService = null;
     RegistryListener registryListener = null;
-    Service wanIpConnectionService = null;
+
+    Map<String, Service> recognizedServices;
 
     /**
      * Empty constructor. Creates in instance of UpnpServiceImpl.
@@ -54,9 +61,13 @@ public class NatUpnpManager {
             public void deviceAdded(Registry registry, Device device) {
                 log.info("Device added: "+ device.getDetails().getFriendlyName());
                 // TODO: crawl device and look for lintener
-                inspectDeviceRecursive(device);
+                inspectDeviceRecursive(device, recognizedServices.keySet());
             }
         };
+
+        // prime our recognizedServices map so we can use its key-set later
+        recognizedServices = new HashMap<>();
+        recognizedServices.put(SERVICE_TYPE_WAN_IP_CONNECTION, null);
     }
 
     /**
@@ -95,12 +106,21 @@ public class NatUpnpManager {
     }
 
     /**
+     * Returns the first of the discovered services of the given type, if any.
+     *
+     * @return the first instance of the given type, or null if none 
+     */
+    public Service getService(String type) {
+        return recognizedServices.get(type);
+    }
+
+    /**
      * Returns whether or not the WANIPConnection service has been discovered.
      *
      * @return true if the WANIPConnection has been discovered, false otherwise.
      */
     public boolean isWANIPConnectionServiceDiscovered() {
-        return (null != wanIpConnectionService);
+        return (null != getWANIPConnectionService());
     }
 
     /**
@@ -109,7 +129,7 @@ public class NatUpnpManager {
      * @return the WANIPConnection Service if we have found it, or null.
      */
     public Service getWANIPConnectionService() {
-        return wanIpConnectionService;
+        return getService(SERVICE_TYPE_WAN_IP_CONNECTION);
     }
 
     /**
@@ -171,15 +191,18 @@ public class NatUpnpManager {
     /**
      * Recursively crawls the given device to look for specific services.
      */
-    protected void inspectDeviceRecursive(Device device) {
+    protected void inspectDeviceRecursive(Device device, Set<String> serviceIds) {
         for (Service service : device.getServices()) {
-            if (service.getServiceType().getType().equals("WANIPConnection")) {
-                log.info("Found WANIPConnection service: "+ service.getServiceType());
-                wanIpConnectionService = service;
+            String serviceType = service.getServiceType().getType();
+            if (serviceIds.contains(serviceType)) {
+                // TODO: handle case where service is already "recognized" as this could lead to
+                // some odd bugs
+                recognizedServices.put(serviceType, service);
+                log.info("Discovered service "+ serviceType);
             }
         }
         for (Device subDevice : device.getEmbeddedDevices()) {
-            inspectDeviceRecursive(subDevice);
+            inspectDeviceRecursive(subDevice, serviceIds);
         }
     }
 
