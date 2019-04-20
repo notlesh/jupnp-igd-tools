@@ -115,15 +115,6 @@ public class NatUpnpManager {
     }
 
     /**
-     * Returns whether or not the WANIPConnection service has been discovered.
-     *
-     * @return true if the WANIPConnection has been discovered, false otherwise.
-     */
-    public boolean isWANIPConnectionServiceDiscovered() {
-        return (null != getWANIPConnectionService());
-    }
-
-    /**
      * Get the discovered WANIPConnection service, if any.
      *
      * @return the WANIPConnection Service if we have found it, or null.
@@ -133,22 +124,24 @@ public class NatUpnpManager {
     }
 
     /**
-     * Returns a CompletableFuture that will wait for a WANIPConnection service to be discovered.
+     * Returns a CompletableFuture that will wait for the given service type to be discovered
      *
-     * @return future that will return the WANIPConnection service once it is discovered
+     * @return future that will return the desired service once it is discovered, or null
+     * if the future is cancelled.
      */
-    public CompletableFuture<Service> discoverWANIPConnectionService() {
+    public CompletableFuture<Service> discoverService(String serviceType) {
 
         return CompletableFuture.supplyAsync(() -> {
 
             // wait until our thread is interrupted (assume future was cancelled)
-            // or we discover a WANIPConnection service
+            // or we discover the service
             while (!Thread.currentThread().isInterrupted()) {
-                if (isWANIPConnectionServiceDiscovered()) {
-                    return getWANIPConnectionService();
+                Service service = getService(serviceType);
+                if (null != service) {
+                    return service;
                 } else {
                     try {
-                        Thread.sleep(5);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         // fall back through to "isInterrupted() check"
                     }
@@ -167,7 +160,7 @@ public class NatUpnpManager {
 
         CompletableFuture<String> upnpQueryFuture = new CompletableFuture<>();
 
-        return discoverWANIPConnectionService()
+        return discoverService(SERVICE_TYPE_WAN_IP_CONNECTION)
             .thenCompose(service -> {
 
                 // our query, which will be handled asynchronously by the jupnp library
