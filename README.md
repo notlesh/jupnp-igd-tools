@@ -44,4 +44,6 @@ Using gradle to run is trivial using the `run` task and `--args=...` command to 
 
 * `./gradlew run --args="-h"` for help
 * `./gradlew run --args="--query-external-ip"` to query for external IP address
+* `./gradlew run --args="--query-status-info"` to query for IGD's status info
 * `./gradlew run --args="--map-port ..."` to request a port mapping
+* `./gradlew run --args="--print-registry"` to print devices and services heard over a 10 second period
