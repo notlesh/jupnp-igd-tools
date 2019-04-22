@@ -56,6 +56,11 @@ public class CLI {
                                 .hasArg(false)
                                 .build());
         mainCommandsGroup.addOption(Option.builder(null)
+                                .longOpt("query-status-info")
+                                .desc("Query the IGD for 'status info'")
+                                .hasArg(false)
+                                .build());
+        mainCommandsGroup.addOption(Option.builder(null)
                                 .longOpt("map-port")
                                 .desc("Request that the IGD map a port")
                                 .hasArg(false)

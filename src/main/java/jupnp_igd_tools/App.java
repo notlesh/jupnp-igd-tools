@@ -7,6 +7,7 @@ import jupnp_igd_tools.CLI;
 import jupnp_igd_tools.igd.NatUpnpManager;
 
 import org.jupnp.support.model.PortMapping;
+import org.jupnp.support.model.Connection;
 import org.jupnp.model.types.UnsignedIntegerFourBytes;
 import org.jupnp.model.types.UnsignedIntegerTwoBytes;
 
@@ -64,6 +65,24 @@ public class App {
                 e.printStackTrace();
                 System.exit(RETURN_UPNP_QUERY_ERROR);
             }
+
+        } else if (cl.hasOption("query-status-info")) {
+            NatUpnpManager upnpManager = new NatUpnpManager();
+            upnpManager.start();
+            CompletableFuture<Connection.StatusInfo> future = upnpManager.queryStatusInfo();
+            try {
+                Connection.StatusInfo statusInfo = future.get();
+                System.out.println("GetStatusInfo results:");
+                System.out.println("  status:         "+ statusInfo.getStatus());
+                System.out.println("  uptime seconds: "+ statusInfo.getUptimeSeconds());
+                System.out.println("  last error    : "+ statusInfo.getLastError());
+                System.exit(0);
+            } catch (Exception e) {
+                System.err.println("Error sending query");
+                e.printStackTrace();
+                System.exit(RETURN_UPNP_QUERY_ERROR);
+            }
+
 
         } else if (cl.hasOption("map-port")) {
             NatUpnpManager upnpManager = new NatUpnpManager();
