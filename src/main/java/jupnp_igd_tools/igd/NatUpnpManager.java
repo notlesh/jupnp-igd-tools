@@ -7,6 +7,8 @@ import org.jupnp.UpnpService;
 import org.jupnp.UpnpServiceImpl;
 import org.jupnp.DefaultUpnpServiceConfiguration;
 import org.jupnp.support.igd.callback.GetExternalIP;
+import org.jupnp.support.igd.callback.PortMappingAdd;
+import org.jupnp.support.model.PortMapping;
 import org.jupnp.model.meta.Device;
 import org.jupnp.model.meta.RemoteDevice;
 import org.jupnp.model.meta.Service;
@@ -168,6 +170,36 @@ public class NatUpnpManager {
                     @Override
                     protected void success(String result) {
                         upnpQueryFuture.complete(result);
+                    }
+
+                    @Override
+                    public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                        upnpQueryFuture.completeExceptionally(new Exception(msg));
+                    }
+                };
+                upnpService.getControlPoint().execute(callback);
+
+                return upnpQueryFuture;
+            });
+    }
+
+    /**
+     * Sends a UPnP request to the discovered IGD to request a port forward.
+     *
+     * @return A CompletableFuture that can be used to query the result (or error).
+     */
+    public CompletableFuture<String> requestPortForward(PortMapping portMapping) {
+
+        CompletableFuture<String> upnpQueryFuture = new CompletableFuture<>();
+
+        return discoverService(SERVICE_TYPE_WAN_IP_CONNECTION)
+            .thenCompose(service -> {
+
+                // our query, which will be handled asynchronously by the jupnp library
+                PortMappingAdd callback = new PortMappingAdd(service, portMapping) {
+                    @Override
+                    public void success(ActionInvocation invocation) {
+                        upnpQueryFuture.complete("TODO");
                     }
 
                     @Override
