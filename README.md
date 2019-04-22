@@ -43,4 +43,5 @@ ln -s $JUPNP_DIR/bundles/org.jupnp.osgi/target/org.jupnp.osgi-2.6.0-SNAPSHOT.jar
 Using gradle to run is trivial using the `run` task and `--args=...` command to pass command line args. Currently supported:
 
 * `./gradlew run --args="-h"` for help
-* `./gradlew run --args="-e"` to query for external IP address
+* `./gradlew run --args="--query-external-ip"` to query for external IP address
+* `./gradlew run --args="--map-port ..."` to request a port mapping
