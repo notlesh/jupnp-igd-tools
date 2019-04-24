@@ -56,13 +56,13 @@ public class NatUpnpManager {
      *
      * @param service is the desired instance of UpnpService.
      */
-    public NatUpnpManager(UpnpService service) {
+    public NatUpnpManager(final UpnpService service) {
         upnpService = service;
 
         // registry listener to observe new devices and look for specific services
         registryListener = new DefaultRegistryListener() {
             @Override
-            public void deviceAdded(Registry registry, Device device) {
+            public void deviceAdded(final Registry registry, final Device device) {
                 log.info("Device added: "+ device.getDetails().getFriendlyName());
                 // TODO: crawl device and look for lintener
                 inspectDeviceRecursive(device, recognizedServices.keySet());
@@ -114,7 +114,7 @@ public class NatUpnpManager {
      *
      * @return the first instance of the given type, or null if none 
      */
-    public Service getService(String type) {
+    public Service getService(final String type) {
         return recognizedServices.get(type);
     }
 
@@ -133,7 +133,7 @@ public class NatUpnpManager {
      * @return future that will return the desired service once it is discovered, or null
      * if the future is cancelled.
      */
-    public CompletableFuture<Service> discoverService(String serviceType) {
+    public CompletableFuture<Service> discoverService(final String serviceType) {
 
         return CompletableFuture.supplyAsync(() -> {
 
@@ -170,12 +170,12 @@ public class NatUpnpManager {
                 // our query, which will be handled asynchronously by the jupnp library
                 GetExternalIP callback = new GetExternalIP(service) {
                     @Override
-                    protected void success(String result) {
+                    protected void success(final String result) {
                         upnpQueryFuture.complete(result);
                     }
 
                     @Override
-                    public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                    public void failure(final ActionInvocation invocation, final UpnpResponse operation, final String msg) {
                         upnpQueryFuture.completeExceptionally(new Exception(msg));
                     }
                 };
@@ -199,12 +199,12 @@ public class NatUpnpManager {
 
                 GetStatusInfo callback = new GetStatusInfo(service) {
                     @Override
-                    public void success(Connection.StatusInfo statusInfo) {
+                    public void success(final Connection.StatusInfo statusInfo) {
                         upnpQueryFuture.complete(statusInfo);
                     }
 
                     @Override
-                    public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                    public void failure(final ActionInvocation invocation, final UpnpResponse operation, final String msg) {
                         upnpQueryFuture.completeExceptionally(new Exception(msg));
                     }
                 };
@@ -219,7 +219,7 @@ public class NatUpnpManager {
      *
      * @return A CompletableFuture that can be used to query the result (or error).
      */
-    public CompletableFuture<String> requestPortForward(PortMapping portMapping) {
+    public CompletableFuture<String> requestPortForward(final PortMapping portMapping) {
 
         CompletableFuture<String> upnpQueryFuture = new CompletableFuture<>();
 
@@ -229,12 +229,12 @@ public class NatUpnpManager {
                 // our query, which will be handled asynchronously by the jupnp library
                 PortMappingAdd callback = new PortMappingAdd(service, portMapping) {
                     @Override
-                    public void success(ActionInvocation invocation) {
+                    public void success(final ActionInvocation invocation) {
                         upnpQueryFuture.complete("TODO");
                     }
 
                     @Override
-                    public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                    public void failure(final ActionInvocation invocation, final UpnpResponse operation, final String msg) {
                         upnpQueryFuture.completeExceptionally(new Exception(msg));
                     }
                 };
@@ -247,7 +247,7 @@ public class NatUpnpManager {
     /**
      * Recursively crawls the given device to look for specific services.
      */
-    protected void inspectDeviceRecursive(Device device, Set<String> serviceIds) {
+    protected void inspectDeviceRecursive(final Device device, final Set<String> serviceIds) {
         for (Service service : device.getServices()) {
             String serviceType = service.getServiceType().getType();
             if (serviceIds.contains(serviceType)) {
@@ -275,7 +275,7 @@ public class NatUpnpManager {
     /**
      * Recursively print out the devices and services known to the registry
      */
-    public void printDeviceRecursive(Device device, String indent) {
+    public void printDeviceRecursive(final Device device, final String indent) {
         String nextIndent = "|    ";
         System.out.println(indent +"├-- device: "+ device.getDetails().getFriendlyName());
         System.out.println(indent + nextIndent +"├-- id:           "+ device.getIdentity());

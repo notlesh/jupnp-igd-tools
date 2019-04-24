@@ -31,7 +31,7 @@ public class App {
     public static final int RETURN_UPNP_QUERY_ERROR = 3;
     public static final int RETURN_UNCAUGHT_EXCEPTION = 4;
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
             doMain(args);
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class App {
             System.exit(RETURN_UNCAUGHT_EXCEPTION);
         }
     }
-    public static void doMain(String[] args) {
+    public static void doMain(final String[] args) {
 
         CLI cli = new CLI();
         CommandLine cl = null;
@@ -130,7 +130,7 @@ public class App {
      * @return a filled out PortMapping object
      * @throws a ParseException if options are missing or arguments are incorrect.
      */
-    private static PortMapping buildPortMappingParametersFormCLI(CommandLine cl) throws ParseException {
+    private static PortMapping buildPortMappingParametersFormCLI(final CommandLine cl) throws ParseException {
 
         // note that we do a lot of error handling that should be redundant here. however, the 
         // Commons CLI lib doesn't support options that are conditionally required (e.g. required

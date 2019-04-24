@@ -20,12 +20,12 @@ public class CLI {
         options = buildCommandLine();
     }
 
-    public CommandLine parse(String[] args) throws ParseException {
+    public CommandLine parse(final String[] args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
         return parser.parse(options, args);
     }
 
-    public void printUsageText(String name) {
+    public void printUsageText(final String name) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setOptionComparator(null); // this preserves insertion order as opposed to alphanumeric
         formatter.printHelp(
